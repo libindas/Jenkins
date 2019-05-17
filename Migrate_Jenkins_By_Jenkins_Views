@@ -1,0 +1,13 @@
+# Copy jenkins job based on views
+# Migrate jenkins job to new server based on views
+
+cat config.xml|sed -n "/VIEW_NAME/,/hudson.plugins.nested__view.NestedView>/p"|grep includeRegex|grep -v ".*[0-9]"|tail -9|grep includeRegex|cut -d'>' -f2|cut -d'<' -f1|tr -d '.'|while read line
+do
+    ls -ld jobs/$line|awk '{print $NF}'| while read dir
+    do
+          if [ -f ${dir}/config.xml ]
+       then
+               Job_name=$(basename ${dir})
+              curl -X POST -H "Content-Type:application/xml" -d @${dir}/config.xml  "http://NEW.JENKINS.URL:8080/createItem?name=${Job_name}" -u "username:*******"
+          fi
+   done
